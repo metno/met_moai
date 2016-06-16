@@ -1,0 +1,5 @@
+deps/
+met_moai.egg-info/
+*.pyc
+moai.log
+
