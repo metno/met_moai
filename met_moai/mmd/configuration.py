@@ -1,13 +1,12 @@
 import ConfigParser
 
-config_file = 'etc/mmd_config.ini'
+config_files = ['etc/mmd_config.ini', 
+                '/etc/met_moai/mmd_config.ini']
 
 def get_config():
     parser = ConfigParser.SafeConfigParser()
-    parser.read([config_file])
+    parser.read(config_files)
     return parser
-    
-
 
 def xslt_config_for(identifier):
     config = get_config()
