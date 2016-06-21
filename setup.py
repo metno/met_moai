@@ -13,7 +13,7 @@ setup(
         'svn==0.3.39'
     ],
     entry_points={'moai.provider': ['svn=met_moai.mmd.provider:SVNProvider'],
-                  'moai.content':['mmd_example=met_moai.mmd.content:MMDContent'],
+                  'moai.content':['mmd=met_moai.mmd.content:MMDContent'],
                   'moai.format':['oai_dc=moai.metadata.oaidc:OAIDC',
                                  'mmd=met_moai.mmd.format:MMDFormat',
                                  'iso=met_moai.mmd.format:ISO19115']}
