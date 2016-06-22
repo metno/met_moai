@@ -2,6 +2,7 @@ import lxml.etree
 import urllib
 import logging
 from met_moai.mmd.configuration import xslt_config_for
+from sqlalchemy.sql.ddl import SchemaDropper
 
 
 class MMDFormat(object):
@@ -35,18 +36,18 @@ class _ConvertingFormat(object):
     '''Generic converter, reading data in mmd format, and converting it using the given schema.'''
     
     xslt_location = None
-    ns = None
+    schema_location = None
+    namespace = None
     
     def __init__(self, prefix, config, db):
         self.prefix = prefix
         self.config = config
-        self.schemas = self.ns
     
     def get_namespace(self):
-        return self.ns[self.prefix]
+        return self.namespace
 
     def get_schema_location(self):
-        return self.schemas[self.prefix]
+        return self.schema_location
     
     def __call__(self, element, metadata):
         doc = urllib.urlopen(self.xslt_location).read() 
@@ -63,7 +64,8 @@ def create_converter_to(identifier):
         config = xslt_config_for(identifier)
         class ReturnedFormat(_ConvertingFormat):
             xslt_location = config['url']
-            ns = config['namespaces']
+            schema_location = config['schema']
+            namespace = config['namespace']
         return ReturnedFormat
     except KeyError:
         logging.warning('No conversion info available for ' + identifier)

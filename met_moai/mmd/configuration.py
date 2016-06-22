@@ -11,10 +11,8 @@ def get_config():
 def xslt_config_for(identifier):
     config = get_config()
     url = config.get(identifier, 'url')
-    namespaces = config.get(identifier, 'namespaces').split(',')
-    ns = {}
-    for n in namespaces:
-        key, value = n.split('->')
-        ns[key.strip()] = value.strip()
-    
-    return {'url': url, 'namespaces': ns}
+    schema = config.get(identifier, 'schema')
+    namespaces = config.get(identifier, 'namespace')
+    return {'url': url, 
+            'schema': schema, 
+            'namespace': namespaces}
