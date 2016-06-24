@@ -9,8 +9,7 @@ setup(
     dependency_links = ['https://github.com/infrae/moai/tarball/master#egg=MOAI-2.0.0beta'],
     install_requires=[
         'pyoai==2.4.4',
-        'MOAI>=2.0.0beta',
-        'svn==0.3.39'
+        'MOAI>=2.0.0beta'
     ],
     entry_points={'moai.provider': ['svn=met_moai.mmd.provider:SVNProvider'],
                   'moai.content':['mmd=met_moai.mmd.content:MMDContent'],

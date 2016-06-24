@@ -1,5 +1,16 @@
 from lxml import etree
-from moai.utils import XPath
+import urllib
+from datetime import datetime
+import re
+
+def parse_time(timestring):
+    alternatives = ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%d']
+    for a in alternatives:
+        try:
+            return datetime.strptime(timestring, a)
+        except ValueError:
+            pass
+    raise ValueError('Unable to parse time string: ' + timestring)
 
 
 class MMDContent(object):
@@ -13,20 +24,38 @@ class MMDContent(object):
 
     def _generate_identifier(self, path):
         return unicode(path.split('/')[-1][:-4])
+
+    def _get_sets(self, path):
+        return {u'public': {u'name':u'public',  u'description':u'Public access'}}
         
     def update(self, path):
-        self.id = self._generate_identifier(path)
-        
-        doc = etree.parse(path)
-        ns = {'mmd': 'http://www.met.no/schema/mmd',
-              'gml': 'http://www.opengis.net/gml'}
-        xpath = XPath(doc, nsmap=ns)
-        self.root = doc.getroot()
-        
-        self.modified = xpath.date('mmd:last_metadata_update')
-        self.deleted = False
-        self.sets = {u'public': {u'name':u'public',  u'description':u'Public access'}}
+        match = re.match('(.+)#time=(.+)', path)
+        if match:
+            path = match.group(1)
+            self.modified = parse_time(match.group(2))
+        else:
+            self.modified = None
 
-        document_text = open(path).read()
-        self.metadata = {'mmd': document_text}
-    
+        self.id = self._generate_identifier(path)
+
+        document = urllib.urlopen(path)
+
+        if document.getcode() in (200, None):
+            ns = {'mmd': 'http://www.met.no/schema/mmd',
+                  'gml': 'http://www.opengis.net/gml'}
+            root = etree.fromstring(document.read())
+            if not self.modified:
+                parsed_time = root.xpath('mmd:last_metadata_update', namespaces=ns)
+                if parsed_time:
+                    self.modified = parse_time(parsed_time[0].text)
+                else:
+                    self.modified = datetime.now()
+            self.deleted = False
+            self.sets = self._get_sets(path)
+            self.metadata = {'mmd': etree.tostring(root)}
+        else:
+            if not self.modified:
+                self.modified = datetime.now()
+            self.deleted = True
+            self.sets = self._get_sets(path)
+            self.metadata = {'mmd': ''}
