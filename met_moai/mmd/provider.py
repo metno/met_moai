@@ -12,7 +12,6 @@ class SubversionClient(object):
         if uri[-1] != '/':
             uri += '/'
         self._uri = uri
-        #self._domain = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(uri))
         self._svn_binary = svn_binary
 
     def _full_path(self, relative_path):
