@@ -1,16 +1,6 @@
 from lxml import etree
 import urllib
-from datetime import datetime
-import re
-
-def parse_time(timestring):
-    alternatives = ['%Y-%m-%dT%H:%M:%S.%fZ', '%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%d']
-    for a in alternatives:
-        try:
-            return datetime.strptime(timestring, a)
-        except ValueError:
-            pass
-    raise ValueError('Unable to parse time string: ' + timestring)
+import met_moai.mmd.util as util
 
 
 class MMDContent(object):
@@ -24,8 +14,6 @@ class MMDContent(object):
         self._ns = {'mmd': 'http://www.met.no/schema/mmd',
               'gml': 'http://www.opengis.net/gml'}
 
-
-
     def _generate_identifier(self, path):
         return unicode(path.split('/')[-1][:-4])
 
@@ -37,29 +25,19 @@ class MMDContent(object):
                 ret[text] = {u'name': text,  u'description': text}
         return ret
         
-    def update(self, path):
-        match = re.match('(.+)#time=(.+)', path)
-        if match:
-            path = match.group(1)
-            self.modified = parse_time(match.group(2))
-        else:
-            self.modified = None
-
-        self.id = self._generate_identifier(path)
-
-        document = urllib.urlopen(path)
-
-        if document.getcode() in (200, None):
+    def update(self, data):
+        self.id = unicode(data['id'])
+        svninfo = data['svn']
+        self.modified = svninfo.date
+        self.deleted = svninfo.deleted
+        if not svninfo.deleted:
+            document = urllib.urlopen(svninfo.path)
             root = etree.fromstring(document.read())
             parsed_time = root.xpath('mmd:last_metadata_update', namespaces=self._ns)
             if parsed_time:
-                self.modified = parse_time(parsed_time[0].text)
-            self.deleted = False
+                self.modified = util.parse_time(parsed_time[0].text)
             self.sets = self._get_sets(root)
             self.metadata = {'mmd': etree.tostring(root)}
         else:
-            if not self.modified:
-                self.modified = datetime.now()
-            self.deleted = True
             self.sets = {}
             self.metadata = {'mmd': ''}

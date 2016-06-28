@@ -4,7 +4,7 @@ from urlparse import urlparse
 import logging
 import collections
 import os
-from datetime import datetime
+import met_moai.mmd.util as util
 
 
 class SubversionClient(object):
@@ -13,28 +13,45 @@ class SubversionClient(object):
             uri += '/'
         self._uri = uri
         self._svn_binary = svn_binary
+        self.repository_root = self._get_repository_root(uri)
+        if not uri.startswith(self.repository_root):
+            raise Exception('Error when parsing subversion URI')
+        self.repository_path = uri[len(self.repository_root):]
 
     def _full_path(self, relative_path):
-        return self._uri + relative_path.split('/')[-1]
+        return self.repository_root + relative_path
+
+    def _is_relevant_path(self, path):
+        return path.get('kind') == 'file' and \
+            path.text.endswith('.xml') and \
+            path.text.startswith(self.repository_path)
+            
+    def _get_repository_root(self, uri):
+        cmd = [self._svn_binary, 'info', '--xml', uri]
+        xml = subprocess.check_output(cmd)
+        root_element = etree.fromstring(xml).xpath('entry/repository/root')
+        if root_element:
+            return root_element[0].text
+        else:
+            raise Exception('Unable to parse repository root')
 
     def changes(self, since = None):
-        cmd = [self._svn_binary, 'log', '-v', '--xml', self._uri]
+        cmd = [self._svn_binary, 'log', '-v', '--xml', self.repository_root]
         if since:
             cmd = cmd + ['-r', '{%s}:HEAD' % (since.isoformat(),)]
-        print ' '.join(cmd)
         try:
             xml = subprocess.check_output(cmd)
             root = etree.fromstring(xml)
             Entry = collections.namedtuple('LogEntry', ['date', 'msg', 'author', 'path', 'deleted'])
             entry_list = {}
-            for logentry in root[1:]:  # Subversion log returns the most recent entry at starting time, but we want changes after the starting time 
+            for logentry in root:  # Subversion log returns the most recent entry at starting time, but we want changes after the starting time 
                 if logentry.tag != 'logentry':
                     continue
-                date = logentry.xpath('date')[0].text
+                date = util.parse_time(logentry.xpath('date')[0].text)
                 msg = logentry.xpath('msg')[0].text
                 author = logentry.xpath('author')[0].text
                 for path in logentry.xpath('paths/path'):
-                    if path.get('kind') == 'file' and path.text.endswith('.xml'):
+                    if self._is_relevant_path(path):
                         full_path = self._full_path(path.text)
                         if not full_path in entry_list:
                             entry_list[full_path] = Entry(date, msg, author, self._full_path(path.text), path.get('action') == 'D')
@@ -42,6 +59,7 @@ class SubversionClient(object):
         except subprocess.CalledProcessError as e:
             logging.error(e.output)
             raise  # TODO improve this
+
 
 class SVNProvider(object):
     """Provides content from a svn mmd repository,
@@ -71,9 +89,11 @@ class SVNProvider(object):
         new_modifications = {}
         modified = self._client.changes(from_date)
         for pathinfo in modified:
-                    uri = pathinfo.path
-                    identifying_string = '%s#time=%s' % (uri, pathinfo.date)
-                    new_modifications[self._identifier(uri)] = identifying_string
+            id = self._identifier(pathinfo.path)
+            info = {'id': id,
+                    'uri': pathinfo.path,
+                    'svn': pathinfo}
+            new_modifications[id] = info
         self._elements.update(new_modifications)
         return new_modifications.keys()
 
