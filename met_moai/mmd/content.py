@@ -20,8 +20,8 @@ class MMDContent(object):
     def _get_sets(self, root):
         ret = {}
         for element in root.xpath('mmd:keywords/mmd:keyword', namespaces=self._ns):
-            if element.text is not None:
-                text = unicode(element.text.replace(' > ', ':'))
+            if element.text:
+                text = unicode(element.text)
                 ret[text] = {u'name': text,  u'description': text}
         return ret
         
@@ -30,14 +30,11 @@ class MMDContent(object):
         svninfo = data['svn']
         self.modified = svninfo.date
         self.deleted = svninfo.deleted
-        if not svninfo.deleted:
-            document = urllib.urlopen(svninfo.path)
-            root = etree.fromstring(document.read())
+        document = svninfo.get() #urllib.urlopen(svninfo.path)
+        root = etree.fromstring(document)
+        if not self.deleted:
             parsed_time = root.xpath('mmd:last_metadata_update', namespaces=self._ns)
             if parsed_time:
                 self.modified = util.parse_time(parsed_time[0].text)
-            self.sets = self._get_sets(root)
-            self.metadata = {'mmd': etree.tostring(root)}
-        else:
-            self.sets = {}
-            self.metadata = {'mmd': ''}
+        self.sets = self._get_sets(root)
+        self.metadata = {'mmd': etree.tostring(root)}

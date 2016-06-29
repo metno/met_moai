@@ -7,12 +7,30 @@ import os
 import met_moai.mmd.util as util
 
 
+class LogEntry(object):
+    def __init__(self, date, msg, author, path, deleted):
+        self.date = date
+        self.msg = msg
+        self.author = author
+        self.path = path
+        self.deleted = deleted
+        
+    def get(self):
+#         if 'topaz' in self.path:
+#             import pdb
+#             pdb.set_trace()
+        cmd = [SubversionClient.binary, 'cat', self.path]
+        return subprocess.check_output(cmd)
+
+
 class SubversionClient(object):
-    def __init__(self, uri, svn_binary='svn'):
+    
+    binary = 'svn'
+    
+    def __init__(self, uri):
         if uri[-1] != '/':
             uri += '/'
         self._uri = uri
-        self._svn_binary = svn_binary
         self.repository_root = self._get_repository_root(uri)
         if not uri.startswith(self.repository_root):
             raise Exception('Error when parsing subversion URI')
@@ -27,7 +45,7 @@ class SubversionClient(object):
             path.text.startswith(self.repository_path)
             
     def _get_repository_root(self, uri):
-        cmd = [self._svn_binary, 'info', '--xml', uri]
+        cmd = [self.binary, 'info', '--xml', uri]
         xml = subprocess.check_output(cmd)
         root_element = etree.fromstring(xml).xpath('entry/repository/root')
         if root_element:
@@ -36,13 +54,12 @@ class SubversionClient(object):
             raise Exception('Unable to parse repository root')
 
     def changes(self, since = None):
-        cmd = [self._svn_binary, 'log', '-v', '--xml', self.repository_root]
+        cmd = [self.binary, 'log', '-v', '--xml', self.repository_root]
         if since:
             cmd = cmd + ['-r', '{%s}:HEAD' % (since.isoformat(),)]
         try:
             xml = subprocess.check_output(cmd)
             root = etree.fromstring(xml)
-            Entry = collections.namedtuple('LogEntry', ['date', 'msg', 'author', 'path', 'deleted'])
             entry_list = {}
             for logentry in root:  # Subversion log returns the most recent entry at starting time, but we want changes after the starting time 
                 if logentry.tag != 'logentry':
@@ -52,15 +69,20 @@ class SubversionClient(object):
                 author = logentry.xpath('author')[0].text
                 for path in logentry.xpath('paths/path'):
                     if self._is_relevant_path(path):
+                        deleted = path.get('action') == 'D'
                         full_path = self._full_path(path.text)
                         if not full_path in entry_list:
-                            entry_list[full_path] = Entry(date, msg, author, self._full_path(path.text), path.get('action') == 'D')
+                            entry_list[full_path] = LogEntry(date, msg, author, self._full_path(path.text), deleted)
+                        else:
+                            entry = entry_list[full_path]
+                            if entry.deleted and not '@' in entry.path:
+                                entry.path = '%s@%s' % (entry.path, logentry.attrib['revision'])
             return entry_list.values()
         except subprocess.CalledProcessError as e:
             logging.error(e.output)
             raise  # TODO improve this
 
-
+    
 class SVNProvider(object):
     """Provides content from a svn mmd repository,
     implementation of :ref:`IContentProvider`"""

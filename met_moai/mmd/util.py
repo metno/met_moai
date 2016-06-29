@@ -8,4 +8,4 @@ def parse_time(timestring):
             return datetime.strptime(timestring, a)
         except ValueError:
             pass
-    raise ValueError('Unable to parse time string: ' + timestring)
+    return None
