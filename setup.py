@@ -15,5 +15,6 @@ setup(
                   'moai.content':['mmd=met_moai.mmd.content:MMDContent'],
                   'moai.format':['oai_dc=moai.metadata.oaidc:OAIDC',
                                  'mmd=met_moai.mmd.format:MMDFormat',
-                                 'iso=met_moai.mmd.format:ISO19115']}
+                                 'iso=met_moai.mmd.format:ISO19115',
+                                 'dif=met_moai.mmd.format:DIF']}
 )

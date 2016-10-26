@@ -5,6 +5,7 @@ from met_moai.mmd.configuration import xslt_config_for
 from sqlalchemy.sql.ddl import SchemaDropper
 
 
+
 class MMDFormat(object):
     def __init__(self, prefix, config, db):
         self.prefix = prefix
@@ -50,7 +51,7 @@ class _ConvertingFormat(object):
         return self.schema_location
     
     def __call__(self, element, metadata):
-        doc = urllib.urlopen(self.xslt_location).read() 
+        doc = urllib.urlopen(self.xslt_location).read()
         xslt_root = lxml.etree.XML(doc)
         transform = lxml.etree.XSLT(xslt_root)
 
@@ -72,3 +73,4 @@ def create_converter_to(identifier):
         return None
 
 ISO19115 = create_converter_to('iso19115')
+DIF = create_converter_to('dif')
