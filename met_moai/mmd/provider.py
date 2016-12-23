@@ -91,7 +91,7 @@ class SVNProvider(object):
         '''
         Constructor
         '''
-        svn_uri = 'https' + uri[uri.find(':'):]
+        svn_uri = uri[uri.find(':')+1:]
         self._client = SubversionClient(svn_uri)
         self._elements = {}
         

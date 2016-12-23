@@ -6,6 +6,6 @@ def parse_time(timestring):
     for a in alternatives:
         try:
             return datetime.strptime(timestring, a)
-        except ValueError:
+        except:
             pass
-    return None
+    return datetime.now()
