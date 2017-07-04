@@ -11,7 +11,7 @@ setup(
         'pyoai==2.4.4',
         'MOAI>=2.0.0beta'
     ],
-    entry_points={'moai.provider': ['svn=met_moai.mmd.provider:SVNProvider'],
+    entry_points={'moai.provider': ['metadata=met_moai.mmd.provider:MetaEditProvider'],
                   'moai.content':['mmd=met_moai.mmd.content:MMDContent'],
                   'moai.format':['oai_dc=moai.metadata.oaidc:OAIDC',
                                  'mmd=met_moai.mmd.format:MMDFormat',

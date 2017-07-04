@@ -1,6 +1,7 @@
 from lxml import etree
-import urllib
+import urllib2
 import met_moai.mmd.util as util
+import logging
 
 
 class MMDContent(object):
@@ -26,15 +27,19 @@ class MMDContent(object):
         return ret
         
     def update(self, data):
-        self.id = unicode(data['id'])
-        svninfo = data['svn']
-        self.modified = svninfo.date
-        self.deleted = svninfo.deleted
-        document = svninfo.get() #urllib.urlopen(svninfo.path)
-        root = etree.fromstring(document)
-        if not self.deleted:
-            parsed_time = root.xpath('mmd:last_metadata_update', namespaces=self._ns)
-            if parsed_time:
-                self.modified = util.parse_time(parsed_time[0].text)
-        self.sets = self._get_sets(root)
-        self.metadata = {'mmd': etree.tostring(root)}
+        try:
+            logging.info(data['id'])
+            self.id = data['id']
+            self.modified = data['modified']
+            self.deleted = data['deleted']
+            document = urllib2.urlopen(data['url']).read()
+            root = etree.fromstring(document)
+            if not self.deleted:
+                parsed_time = root.xpath('mmd:last_metadata_update', namespaces=self._ns)
+                if parsed_time:
+                    self.modified = util.parse_time(parsed_time[0].text)
+            self.sets = self._get_sets(root)
+            self.metadata = {'mmd': etree.tostring(root)}
+            logging.info(data['id'] + ': ok')
+        except Exception as e:
+            logging.warn(str(e))
