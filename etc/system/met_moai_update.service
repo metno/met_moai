@@ -1,0 +1,8 @@
+[Unit]
+Description=Update met_moai database
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/update_moai --config=/usr/local/etc/met_moai/settings.ini mmd
+User=oaipmh
+WorkingDirectory=/var/log/met_moai

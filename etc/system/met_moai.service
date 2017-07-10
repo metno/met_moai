@@ -1,0 +1,9 @@
+[Unit]
+Description=Run met_moai server
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/paster serve /usr/local/etc/met_moai/settings.ini
+Restart=always
+User=oaipmh
+WorkingDirectory=/var/log/met_moai

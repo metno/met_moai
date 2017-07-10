@@ -1,0 +1,5 @@
+[Unit]
+Description=Run met_moai_update.service every hour
+
+[Timer]
+OnCalendar=*-*-* *:19:00

@@ -1,6 +1,7 @@
 import ConfigParser
 
-config_files = ['etc/mmd_config.ini', 
+config_files = ['etc/mmd_config.ini',
+                '/usr/local/etc/met_moai/mmd_config.ini',
                 '/etc/met_moai/mmd_config.ini']
 
 def get_config():
