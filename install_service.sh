@@ -4,12 +4,14 @@ set -euo pipefail
 IFS=$'\n\t'
 
 
+apt-get update
+apt-get install python-pip libxml2-dev libxslt-dev zlib1g-dev
+
 python setup.py install
 
 if ! grep ^oaipmh: /etc/passwd; then
 	useradd -M oaipmh
 	usermod -L oaipmh
-	usermod -s /bin/false oaipmh 
 fi
 
 for d in /var/log/met_moai /var/lib/met_moai; do
