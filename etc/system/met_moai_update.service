@@ -2,7 +2,8 @@
 Description=Update met_moai database
 
 [Service]
-Type=oneshot
+Environment=PYTHON_EGG_CACHE=/var/lib/met_moai/egg
 ExecStart=/usr/local/bin/update_moai --config=/usr/local/etc/met_moai/settings.ini mmd
+Type=oneshot
 User=oaipmh
 WorkingDirectory=/var/log/met_moai

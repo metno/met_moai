@@ -5,7 +5,7 @@ IFS=$'\n\t'
 
 
 apt-get update
-apt-get install python-pip libxml2-dev libxslt-dev zlib1g-dev
+apt-get -y install python-pip libxml2-dev libxslt-dev zlib1g-dev
 
 python setup.py install
 
@@ -14,7 +14,7 @@ if ! grep ^oaipmh: /etc/passwd; then
 	usermod -L oaipmh
 fi
 
-for d in /var/log/met_moai /var/lib/met_moai; do
+for d in /var/log/met_moai /var/lib/met_moai /var/lib/met_moai/egg; do
 	mkdir -p $d
 	chown oaipmh:oaipmh $d
 done

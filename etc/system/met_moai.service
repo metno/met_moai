@@ -4,9 +4,10 @@ After=network-online.target
 Wants=network-online.target systemd-networkd-wait-online.service
 
 [Service]
-Type=simple
+Environment=PYTHON_EGG_CACHE=/var/lib/met_moai/egg
 ExecStart=/usr/local/bin/paster serve /usr/local/etc/met_moai/settings.ini
 Restart=always
+Type=simple
 User=oaipmh
 WorkingDirectory=/var/log/met_moai
 
