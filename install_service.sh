@@ -27,7 +27,7 @@ cp etc/mmd_config.ini /usr/local/etc/met_moai/
 
 systemctl daemon-reload
 
-#systemctl start met_moai_update.service
+systemctl start met_moai_update.service
 
 systemctl enable met_moai_update.timer
 systemctl start met_moai_update.timer
