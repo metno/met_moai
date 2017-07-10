@@ -1,5 +1,7 @@
 [Unit]
 Description=Run met_moai server
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
 
 [Service]
 Type=simple
@@ -7,3 +9,6 @@ ExecStart=/usr/local/bin/paster serve /usr/local/etc/met_moai/settings.ini
 Restart=always
 User=oaipmh
 WorkingDirectory=/var/log/met_moai
+
+[Install]
+WantedBy=multi-user.target

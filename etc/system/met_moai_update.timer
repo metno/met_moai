@@ -1,5 +1,10 @@
 [Unit]
 Description=Run met_moai_update.service every hour
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
 
 [Timer]
 OnCalendar=*-*-* *:19:00
+
+[Install]
+WantedBy=multi-user.target
