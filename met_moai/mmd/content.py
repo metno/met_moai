@@ -10,7 +10,7 @@ class MMDContent(object):
         self.id = None
         self.modified = None
         self.deleted = False
-        self.sets = None
+        self.sets = {}
         self.metadata = None
         self._ns = {'mmd': 'http://www.met.no/schema/mmd',
               'gml': 'http://www.opengis.net/gml'}
@@ -20,26 +20,23 @@ class MMDContent(object):
 
     def _get_sets(self, root):
         ret = {}
-        for element in root.xpath('mmd:keywords/mmd:keyword', namespaces=self._ns):
+        for element in root.xpath('mmd:collection', namespaces=self._ns):
             if element.text:
                 text = unicode(element.text)
                 ret[text] = {u'name': text,  u'description': text}
         return ret
-        
+
     def update(self, data):
-        try:
-            logging.info(data['id'])
-            self.id = data['id']
-            self.modified = data['modified']
-            self.deleted = data['deleted']
-            document = urllib2.urlopen(data['url']).read()
-            root = etree.fromstring(document)
-            if not self.deleted:
-                parsed_time = root.xpath('mmd:last_metadata_update', namespaces=self._ns)
-                if parsed_time:
-                    self.modified = util.parse_time(parsed_time[0].text)
-            self.sets = self._get_sets(root)
-            self.metadata = {'mmd': etree.tostring(root)}
-            logging.info(data['id'] + ': ok')
-        except Exception as e:
-            logging.warn(str(e))
+        logging.info(data['id'])
+        self.id = data['id']
+        self.modified = data['modified']
+        self.deleted = data['deleted']
+        document = urllib2.urlopen(data['url']).read()
+        root = etree.fromstring(document)
+        if not self.deleted:
+            parsed_time = root.xpath('mmd:last_metadata_update', namespaces=self._ns)
+            if parsed_time:
+                self.modified = util.parse_time(parsed_time[0].text)
+        self.sets = self._get_sets(root)
+        self.metadata = {'mmd': etree.tostring(root)}
+        logging.info(data['id'] + ': ok')
