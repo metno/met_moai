@@ -5,7 +5,7 @@ IFS=$'\n\t'
 
 
 apt-get update
-apt-get -y install python-pip libxml2-dev libxslt-dev zlib1g-dev
+apt-get -y install python-pip libxml2-dev libxslt-dev zlib1g-dev subversion
 
 python setup.py install
 
