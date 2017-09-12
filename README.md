@@ -65,3 +65,16 @@ modify here are the follwing:
   * database: Name of a file to store metadata. Must be writeable by
     the user running met_moai.
 
+  * provider: The source for metadata. Must be prefixed with "svn:",
+    and contain the full path to a directory in a subversion
+    repository. The files in that directory will be served.
+
+  * content: type of data in subversion repository. Can currently only
+    be mmd.
+
+
+## Installation
+
+A reasonably sane running setup can be installed or updated by running
+the provided script `install_service.sh` as root. This will install
+met_moai, and make sure it is run on system reboot.
