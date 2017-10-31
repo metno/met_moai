@@ -67,7 +67,10 @@ modify here are the follwing:
 
   * provider: The source for metadata. Must be prefixed with "svn:",
     and contain the full path to a directory in a subversion
-    repository. The files in that directory will be served.
+    repository. The files in that directory will be served. The files
+    in that directory will be served. Note that if you modify this
+    one, you must also delete the file pointed to by the `database`
+    identifier.
 
   * content: type of data in subversion repository. Can currently only
     be mmd.
