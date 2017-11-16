@@ -17,23 +17,29 @@ You need the following debian-packages:
 
 From top source directory:
 
+```bash
 $ virtualenv deps
 $ . deps/bin/activate
 $ python setup.py develop
+```
 
 Update etc/mmd_config.ini and etc/settings.ini (see below). At least
 modify database in settings.ini.
 
+```bash
 $ bin/update.sh
 $ bin/run.sh
+```
 
 Metadata updates are in this setup not automatic. You must
 periodically run bin/update.sh to get recent updates.
 
 For running after the first time:
 
+```bash
 $ . deps/bin/activate
 $ bin/run.sh
+```
 
 Data should then be available in your browser like this
 http://localhost:8080/oai?verb=ListMetadataFormats
@@ -54,7 +60,7 @@ entry_point moai.format, and in etc/settings.ini.
 ### etc/settings.ini
 
 This is the main configuration file for moai. Relevant entries to
-modify here are the follwing:
+modify here are the following:
 
   * url: The advertised host name. Must equal the base address you use
     when connecting to the service. For local installations,
