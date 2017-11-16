@@ -14,6 +14,7 @@ You need the following debian-packages:
   * libxslt-dev
   * zlib1g-dev
   * virtualenv
+  * subversion
 
 From top source directory:
 
