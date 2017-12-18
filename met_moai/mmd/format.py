@@ -51,13 +51,16 @@ class _ConvertingFormat(object):
         return self.schema_location
     
     def __call__(self, element, metadata):
-        doc = urllib.urlopen(self.xslt_location).read()
-        xslt_root = lxml.etree.XML(doc)
-        transform = lxml.etree.XSLT(xslt_root)
+        try:
+            doc = urllib.urlopen(self.xslt_location).read()
+            xslt_root = lxml.etree.XML(doc)
+            transform = lxml.etree.XSLT(xslt_root)
 
-        doc = MMDFormat.document(metadata)
-        
-        element.append(transform(doc).getroot())
+            doc = MMDFormat.document(metadata)
+
+            element.append(transform(doc).getroot())
+        except Exception as e:
+            element.append(lxml.etree.Comment('Error when converting document'))
         
         
 def create_converter_to(identifier):
