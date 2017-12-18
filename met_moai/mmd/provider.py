@@ -206,6 +206,71 @@ class MetaEditProvider(object):
                 }
 
 
+class FileProvider(object):
+    """Provides content from a svn mmd repository,
+    implementation of :ref:`IContentProvider`"""
+    
+    def __init__(self, uri):
+        '''
+        Constructor
+        '''
+        self._path = uri.split(':', 1)[1]
+        print self._path
+        self._elements = {}
+        
+    def set_logger(self, log):
+        """Set the logger instance for this class
+        """
+        self._log = log
+        
+    def _get_file_info(self, f):
+        id = unicode(os.path.basename(f)[:-4])
+        info = {'deleted': False,
+                'id': id,
+                'modified': os.path.getmtime(f),
+                'url': 'file://' + f}
+        return info
+
+    def _get_files(self, from_date):
+        '''Find all metadata files under the location specified in the constructor.'''
+        for root, dirs, files in os.walk(self._path):
+            for f in files:
+                if f.endswith('.xml'):
+                    if (not from_date) or from_date <= os.path.getmtime(f):
+                        file_info = self._get_file_info(root + os.path.sep + f)
+                        yield file_info
+
+
+    def update(self, from_date=None):
+        """Harvests new content added since from_date
+        returns a list of content_ids that were changed/added,
+        this should be called before get_contents is called
+        """
+        for fileinfo in self._get_files(from_date):
+            id = fileinfo['id']
+            self._elements[id] = fileinfo
+            yield id
+
+    def count(self):
+        """Returns number of content objects in the repository
+        returns None if number is unknown, this should not be
+        called before update is called
+        """
+        return len(self._elements)
+
+    def get_content_ids(self, from_date=None):
+        """returns a list/generator of content_ids
+        """
+        return self._elements.keys()
+
+    def get_content_by_id(self, id):
+        """Return content of a specific id
+        """
+        if not id in self._elements:
+            return None
+        return self._elements[id]
+    
+
 if __name__ == '__main__':
     import datetime
     #mep = SVNProvider('...')
