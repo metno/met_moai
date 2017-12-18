@@ -37,6 +37,9 @@ class MMDContent(object):
             parsed_time = root.xpath('mmd:last_metadata_update', namespaces=self._ns)
             if parsed_time:
                 self.modified = util.parse_time(parsed_time[0].text)
+        metadata_status = root.xpath('mmd:metadata_status',  namespaces=self._ns)
+        if metadata_status:
+            self.deleted = metadata_status[0].text.strip().lower() != 'active'
         self.sets = self._get_sets(root)
         self.metadata = {'mmd': etree.tostring(root)}
         logging.info(data['id'] + ': ok')
