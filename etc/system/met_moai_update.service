@@ -3,7 +3,7 @@ Description=Update met_moai database
 
 [Service]
 Environment=PYTHON_EGG_CACHE=/var/lib/met_moai/egg
-ExecStart=/usr/local/bin/update_moai --config=/usr/local/etc/met_moai/settings.ini mmd --date $(date --date=yesterday '+%Y-%m-%d')
+ExecStart=/bin/sh -c "/usr/local/bin/update_moai --config=/usr/local/etc/met_moai/settings.ini mmd --date $(date --date=yesterday --rfc-3339=date)"
 Type=oneshot
 User=oaipmh
 WorkingDirectory=/var/log/met_moai

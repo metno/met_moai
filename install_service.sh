@@ -27,9 +27,9 @@ cp etc/system/met_moai_update.timer /etc/systemd/system/
 cp etc/settings.ini /usr/local/etc/met_moai/
 cp etc/mmd_config.ini /usr/local/etc/met_moai/
 
-systemctl daemon-reload
+cd /tmp && sudo -uoaipmh /usr/local/bin/update_moai --config=/usr/local/etc/met_moai/settings.ini mmd
 
-systemctl start met_moai_update.service
+systemctl daemon-reload
 
 systemctl enable met_moai_update.timer
 systemctl start met_moai_update.timer
