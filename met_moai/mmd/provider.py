@@ -65,6 +65,8 @@ class SubversionClient(object):
                 if logentry.tag != 'logentry':
                     continue
                 date = util.parse_time(logentry.xpath('date')[0].text)
+                if since and util.parse_time(date) < since:
+                    continue
                 msg = logentry.xpath('msg')[0].text
                 author = logentry.xpath('author')[0].text
                 for path in logentry.xpath('paths/path'):
@@ -91,8 +93,8 @@ class SVNProvider(object):
         '''
         Constructor
         '''
-        svn_uri = uri[uri.find(':')+1:]
-        self._client = SubversionClient(svn_uri)
+        svn_uris = uri[uri.find(':')+1:].split('|')
+        self._clients = [ SubversionClient(u) for u in svn_uris ]
         self._elements = {}
         
     def set_logger(self, log):
@@ -109,15 +111,18 @@ class SVNProvider(object):
         this should be called before get_contents is called
         """
         new_modifications = {}
-        modified = self._client.changes(from_date)
-        for pathinfo in modified:
-            id = self._identifier(pathinfo.path)
-            info = {'deleted': pathinfo.deleted,
-                    'id': unicode(id),
-                    'modified': pathinfo.date,
-                    'svn': pathinfo,
-                    'url': pathinfo.path}
-            new_modifications[id] = info
+        for client in self._clients:
+            modified = client.changes(from_date)
+            for pathinfo in modified:
+                id = self._identifier(pathinfo.path)
+                if id in new_modifications:
+                    raise Exception('Same id in multiple documents')
+                info = {'deleted': pathinfo.deleted,
+                        'id': unicode(id),
+                        'modified': pathinfo.date,
+                        'svn': pathinfo,
+                        'url': pathinfo.path}
+                new_modifications[id] = info
         self._elements.update(new_modifications)
         return new_modifications.keys()
 
