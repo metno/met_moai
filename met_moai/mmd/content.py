@@ -2,6 +2,7 @@ from lxml import etree
 import urllib2
 import met_moai.mmd.util as util
 import logging
+import datetime
 
 
 class MMDContent(object):
@@ -33,6 +34,9 @@ class MMDContent(object):
         self.deleted = data['deleted']
         document = urllib2.urlopen(data['url']).read()
         root = etree.fromstring(document)
+        if root.tag != '{http://www.met.no/schema/mmd}mmd':
+            logging.error(data['url'] + ' is an invalid document')
+            return
         if not self.deleted:
             parsed_time = root.xpath('mmd:last_metadata_update', namespaces=self._ns)
             if parsed_time:
