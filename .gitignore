@@ -4,3 +4,6 @@ met_moai.egg-info/
 moai.log
 build/
 dist/
+venv/
+share/
+.vscode/
