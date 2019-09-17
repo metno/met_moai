@@ -2,7 +2,6 @@ import lxml.etree
 import urllib
 import logging
 from met_moai.mmd.configuration import xslt_config_for
-from sqlalchemy.sql.ddl import SchemaDropper
 
 
 
